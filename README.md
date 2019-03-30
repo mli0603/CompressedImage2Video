@@ -3,7 +3,7 @@ CompressedImage2Video
 
 Convert ros data type CompressedImage in a rosbag to a variable framerate video. Variable framerate is achieved through duplicating frames since OpenCv can't encode at variable framerates. This can produce very large files which should be re-encoded with something like ffmpeg.
 
-The code is adapted from github repo https://github.com/OSUrobotics/bag2video.
+The code is adapted from github repo https://github.com/OSUrobotics/bag2video. Necessary changes were made to extract image size and find proper encoding.
 
 # Usage
     usage: CompressedImage2Video.py [-h] [--outfile OUTFILE] [--precision PRECISION] [--viz]

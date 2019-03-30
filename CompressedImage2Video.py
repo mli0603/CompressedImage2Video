@@ -20,6 +20,7 @@ except ImportError:
         print ("If ROS version is pre-Groovy, try putting this package in ROS_PACKAGE_PATH")
         sys.exit(1)
 
+# get necessary info from the rosbag for cv2.VideoWriter
 def get_info(bag, topic=None, start_time=rospy.Time(0), stop_time=rospy.Time(sys.maxint)):
     size = (0,0)
     times = []
@@ -45,6 +46,7 @@ def calc_n_frames(times, precision=10):
     intervals = np.diff(times)
     return np.int64(np.round(precision*intervals/min(intervals)))
 
+# write iamges to video
 def write_frames(bag, writer, total, topic=None, nframes=repeat(1), start_time=rospy.Time(0), stop_time=rospy.Time(sys.maxint), viz=False, encoding='bgr8'):
     bridge = CvBridge()
     if viz:
@@ -54,7 +56,7 @@ def write_frames(bag, writer, total, topic=None, nframes=repeat(1), start_time=r
     for (topic, msg, time), reps in izip(iterator, nframes):
         # print ('\rWriting frame %s of %s at time %s' % (count, total, time))
         img = np.asarray(bridge.compressed_imgmsg_to_cv2(msg, 'bgr8')) 
-        img = cv2.cvtColor(img, cv2.COLOR_BAYER_GR2BGR) #bayer_gbrg8
+        img = cv2.cvtColor(img, cv2.COLOR_BAYER_GR2BGR) # used from compressed image of format bayer_gbrg8
         for rep in range(reps):
             writer.write(img)
         imshow('win', img)
@@ -74,8 +76,8 @@ if __name__ == '__main__':
     parser.add_argument('--precision', '-p', action='store', default=1, type=int,
                         help='Precision of variable framerate interpolation. Higher numbers\
                         match the actual framerater better, but result in larger files and slower conversion times.')
-    parser.add_argument('--fps', '-fps', action='store', default=15, type=int,
-                        help='Frame per second of the video. default 15.')
+    # parser.add_argument('--fps', '-fps', action='store', default=15, type=int,
+    #                     help='Frame per second of the video. default 15.')
     parser.add_argument('--viz', '-v', action='store_true', help='Display frames in a GUI window.')
     parser.add_argument('--start', '-s', action='store', default=rospy.Time(0), type=rospy.Time,
                         help='Rostime representing where to start in the bag.')
@@ -94,14 +96,17 @@ if __name__ == '__main__':
 
     for bagfile in glob.glob(args.bagfile):
         print (bagfile)
+
         outfile = args.outfile
         if not outfile:
             outfile = os.path.join(*os.path.split(bagfile)[-1].split('.')[:-1]) + '.avi'
+        
         bag = rosbag.Bag(bagfile, 'r')
         print ('Calculating video properties')
+
         rate, minrate, maxrate, size, times = get_info(bag, args.topic, start_time=args.start, stop_time=args.end)
         nframes = calc_n_frames(times, args.precision)
-        # writer = cv2.VideoWriter(outfile, cv2.cv.CV_FOURCC(*'DIVX'), rate, size)
+
         writer = cv2.VideoWriter(outfile, cv2.VideoWriter_fourcc(*'DIVX'),np.ceil(maxrate*args.precision),(1288,964))#, , size)
         print ('Writing video')
         write_frames(bag, writer, len(times), topic=args.topic, nframes=nframes, start_time=args.start, stop_time=args.end, encoding=args.encoding)
