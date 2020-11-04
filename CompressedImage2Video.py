@@ -67,7 +67,11 @@ def write_frames(bag, writer, total, topic=None, nframes=repeat(1), start_time=r
     for (topic, msg, time), reps in izip(iterator, nframes):
         # print ('\rWriting frame %s of %s at time %s' % (count, total, time))
         img = np.asarray(bridge.compressed_imgmsg_to_cv2(msg, 'bgr8'))
-        img = cv2.cvtColor(img, cv2.COLOR_BAYER_GR2BGR) # used from compressed image of format bayer_gbrg8
+        # import matplotlib.pyplot as plt
+        # plt.imshow(img)
+        # plt.show()
+        # plt.pause(0.1)
+        # img = cv2.cvtColor(img, cv2.COLOR_BAYER_GR2BGR) # used from compressed image of format bayer_gbrg8
         for rep in range(reps):
             writer.write(img)
         imshow('win', img)
