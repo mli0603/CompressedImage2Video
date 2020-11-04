@@ -31,3 +31,7 @@ The code is adapted from github repo https://github.com/OSUrobotics/bag2video. N
       --end END, -e END     Rostime representing where to stop in the bag.
       --encoding {rgb8,bgr8,mono8}
                             Encoding of the deserialized image.
+                         
+# Note
+- `.avi` seems to be comptibale to most encodings
+- `Line 74` is needed in some cases. I have not had time to fully debug what is going on.
