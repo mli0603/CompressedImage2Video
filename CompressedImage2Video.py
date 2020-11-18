@@ -73,9 +73,11 @@ def write_frames(bag, writer, total, topic=None, nframes=repeat(1), start_time=r
         # plt.pause(0.1)
         # img = cv2.cvtColor(img, cv2.COLOR_BAYER_GR2BGR) # used from compressed image of format bayer_gbrg8
         for rep in range(reps):
+            count += 1
             writer.write(img)
-        imshow('win', img)
-        count += 1
+        if viz:
+            imshow('win', img)
+    print('Total number of frames:', count)
 
 def imshow(win, img):
     cv2.imshow(win, img)

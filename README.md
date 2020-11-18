@@ -9,6 +9,9 @@ The code is adapted from github repo https://github.com/OSUrobotics/bag2video. N
     usage: CompressedImage2Video.py [-h] [--outfile OUTFILE] [--precision PRECISION] [--viz]
                         [--start START] [--end END] [--encoding {rgb8,bgr8,mono8}]
                         topic bagfile
+           CompressedImage2Video_Stereo.py [-h] [--outfile OUTFILE] [--precision PRECISION] [--viz]
+                        [--start START] [--end END] [--encoding {rgb8,bgr8,mono8}]
+                        topic_left topic_right bagfile
     
     Extract and encode video from bag files.
     
