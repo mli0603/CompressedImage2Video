@@ -1,11 +1,9 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 
 from __future__ import division
 import rosbag, rospy, numpy as np
-import sys, os, cv2, glob
-from itertools import izip, repeat
+import sys, cv2, glob
 import argparse
-import pickle 
 from CompressedImage2Video import write_frames, get_info, calc_n_frames, imshow, noshow
 
 # try to find cv_bridge:
@@ -35,7 +33,7 @@ if __name__ == '__main__':
     parser.add_argument('--viz', '-v', action='store_true', help='Display frames in a GUI window.')
     parser.add_argument('--start', '-s', action='store', default=rospy.Time(0), type=rospy.Time,
                         help='Rostime representing where to start in the bag.')
-    parser.add_argument('--end', '-e', action='store', default=rospy.Time(sys.maxint), type=rospy.Time,
+    parser.add_argument('--end', '-e', action='store', default=rospy.Time(sys.maxsize), type=rospy.Time,
                         help='Rostime representing where to stop in the bag.')
     parser.add_argument('--encoding', choices=('rgb8', 'bgr8', 'mono8'), default='bgr8',
                         help='Encoding of the deserialized image.')

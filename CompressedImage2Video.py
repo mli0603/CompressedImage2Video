@@ -1,9 +1,9 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 
 from __future__ import division
 import rosbag, rospy, numpy as np
 import sys, os, cv2, glob
-from itertools import izip, repeat
+from itertools import repeat
 import argparse
 
 # try to find cv_bridge:
@@ -21,17 +21,15 @@ except ImportError:
         sys.exit(1)
 
 # get necessary info from the rosbag for cv2.VideoWriter
-def get_info(bag, topic=None, start_time=rospy.Time(0), stop_time=rospy.Time(sys.maxint)):
+def get_info(bag, topic=None, start_time=rospy.Time(0), stop_time=rospy.Time(sys.maxsize)):
     size = (0,0)
     times = []
 
     # read the first message to get the image size
-    msg = bag.read_messages(topics=topic).next()[1]
+    msg = next(bag.read_messages(topics=topic))[1]
     bridge = CvBridge()
     img = np.asarray(bridge.compressed_imgmsg_to_cv2(msg, 'bgr8'))
     size = (img.shape[1],img.shape[0])
-    # print(size)
-    # print(msg.format)
 
     # now read the rest of the messages for the rates
     iterator = bag.read_messages(topics=topic, start_time=start_time, end_time=stop_time)#, raw=True)
@@ -57,21 +55,15 @@ def calc_n_frames(times, precision=10):
         intervals[:] = 1
         return np.int64(intervals)
 
-# write iamges to video
-def write_frames(bag, writer, total, topic=None, nframes=repeat(1), start_time=rospy.Time(0), stop_time=rospy.Time(sys.maxint), viz=False, encoding='bgr8'):
+# write images to video
+def write_frames(bag, writer, total, topic=None, nframes=repeat(1), start_time=rospy.Time(0), stop_time=rospy.Time(sys.maxsize), viz=False, encoding='bgr8'):
     bridge = CvBridge()
     if viz:
         cv2.namedWindow('win')
     count = 1
     iterator = bag.read_messages(topics=topic, start_time=start_time, end_time=stop_time)
-    for (topic, msg, time), reps in izip(iterator, nframes):
-        # print ('\rWriting frame %s of %s at time %s' % (count, total, time))
-        img = np.asarray(bridge.compressed_imgmsg_to_cv2(msg, 'bgr8'))
-        # import matplotlib.pyplot as plt
-        # plt.imshow(img)
-        # plt.show()
-        # plt.pause(0.1)
-        # img = cv2.cvtColor(img, cv2.COLOR_BAYER_GR2BGR) # used from compressed image of format bayer_gbrg8
+    for (topic, msg, time), reps in zip(iterator, nframes):
+        img = np.asarray(bridge.compressed_imgmsg_to_cv2(msg, encoding))
         for rep in range(reps):
             count += 1
             writer.write(img)
@@ -98,7 +90,7 @@ if __name__ == '__main__':
     parser.add_argument('--viz', '-v', action='store_true', help='Display frames in a GUI window.')
     parser.add_argument('--start', '-s', action='store', default=rospy.Time(0), type=rospy.Time,
                         help='Rostime representing where to start in the bag.')
-    parser.add_argument('--end', '-e', action='store', default=rospy.Time(sys.maxint), type=rospy.Time,
+    parser.add_argument('--end', '-e', action='store', default=rospy.Time(sys.maxsize), type=rospy.Time,
                         help='Rostime representing where to stop in the bag.')
     parser.add_argument('--encoding', choices=('rgb8', 'bgr8', 'mono8'), default='bgr8',
                         help='Encoding of the deserialized image.')
